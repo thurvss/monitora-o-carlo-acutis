@@ -4,8 +4,8 @@ from datetime import datetime
 import threading
 
 URL = "https://anjodajuventude.com.br/"
-BOT_TOKEN = "SEU_TOKEN_AQUI"
-CHAT_ID = "SEU_CHAT_ID_AQUI"
+BOT_TOKEN = "8305296309:AAEtnnYV9HIe6hv-KO8I_nNCz-l1Pm1lAS8"
+CHAT_ID = "7100064741"
 
 CHECK_INTERVAL = 30
 PHRASE_BLOCKED = "envio de novos pedidos está suspenso"
@@ -103,3 +103,4 @@ threading.Thread(target=check_site).start()
 threading.Thread(target=bot_listener).start()
 
 print("Bot e monitor iniciados.")
+
