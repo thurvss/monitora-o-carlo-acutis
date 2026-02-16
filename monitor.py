@@ -21,6 +21,7 @@ def is_blocked(page_text):
     return PHRASE_BLOCKED in page_text.lower()
 
 print("Monitor iniciado...")
+send_telegram("✅ Monitor iniciado com sucesso.")
 
 last_status = None
 
@@ -67,3 +68,4 @@ while True:
         print("Erro:", e)
 
     time.sleep(CHECK_INTERVAL)
+
