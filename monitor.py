@@ -5,13 +5,18 @@ import threading
 
 URL = "https://anjodajuventude.com.br/"
 BOT_TOKEN = "8305296309:AAEtnnYV9HIe6hv-KO8I_nNCz-l1Pm1lAS8"
-CHAT_ID = "7100064741"
+CHAT_ID = int("7100064741")
 
 CHECK_INTERVAL = 30
 PHRASE_BLOCKED = "envio de novos pedidos está suspenso"
 
 last_status = None
+last_open_time = None
+last_close_time = None
 last_update_id = None
+bot_online = True
+last_error = None
+
 
 def send_telegram(message):
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
@@ -21,10 +26,12 @@ def send_telegram(message):
     }
     requests.post(url, data=data)
 
+
 def get_updates():
     global last_update_id
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/getUpdates"
     params = {"timeout": 30}
+
     if last_update_id:
         params["offset"] = last_update_id + 1
 
@@ -37,23 +44,36 @@ def get_updates():
         text = message.get("text", "")
         chat_id = message.get("chat", {}).get("id")
 
-        if chat_id == int(CHAT_ID):
+        if chat_id == CHAT_ID:
             handle_command(text)
 
+
 def handle_command(text):
-    global last_status
+    global last_status, last_open_time, last_close_time
 
     if text == "/start":
-        send_telegram("🤖 Monitor Carlo Acutis ativo.\nUse /status para ver situação atual.")
+        send_telegram("🤖 Bot já está online e monitorando corretamente.")
 
     elif text == "/status":
-        if last_status:
-            send_telegram(f"📊 Status atual: {last_status}")
+        status_bot = "🟢 Online" if bot_online else f"🔴 Erro: {last_error}"
+
+        if last_status == "ABERTO":
+            info = f"🟢 Solicitações ABERTAS desde:\n{last_open_time}"
+        elif last_status == "FECHADO":
+            info = f"🔴 Solicitações FECHADAS em:\n{last_close_time}"
         else:
-            send_telegram("⏳ Ainda verificando o status...")
+            info = "⏳ Ainda verificando status inicial..."
+
+        send_telegram(
+            f"📊 STATUS DO BOT\n"
+            f"{status_bot}\n\n"
+            f"📌 STATUS DAS SOLICITAÇÕES\n"
+            f"{info}"
+        )
+
 
 def check_site():
-    global last_status
+    global last_status, last_open_time, last_close_time, bot_online, last_error
 
     while True:
         try:
@@ -70,37 +90,47 @@ def check_site():
             if last_status is None:
                 last_status = current_status
 
+                if current_status == "ABERTO":
+                    last_open_time = now
+                else:
+                    last_close_time = now
+
             elif current_status != last_status:
 
                 if current_status == "ABERTO":
+                    last_open_time = now
+
                     for _ in range(3):
-                        send_telegram(
-                            f"🟢 PEDIDOS ABERTOS!\nHorário: {now}\n{URL}"
-                        )
+                        send_telegram("🟢 SOLICITAÇÕES ABERTAS!")
                         time.sleep(2)
 
                 elif current_status == "FECHADO":
-                    send_telegram(
-                        f"🔴 PEDIDOS FECHARAM.\nHorário: {now}"
-                    )
+                    last_close_time = now
+                    send_telegram(f"🔴 SOLICITAÇÕES FECHARAM.\n{now}")
 
                 last_status = current_status
 
+            bot_online = True
+            last_error = None
+
         except Exception as e:
-            print("Erro:", e)
+            bot_online = False
+            last_error = str(e)
 
         time.sleep(CHECK_INTERVAL)
+
 
 def bot_listener():
     while True:
         try:
             get_updates()
-        except Exception as e:
-            print("Erro bot:", e)
+        except Exception:
+            pass
 
-# Inicia as threads
+
+# Inicia tudo
 threading.Thread(target=check_site).start()
 threading.Thread(target=bot_listener).start()
 
-print("Bot e monitor iniciados.")
-
+send_telegram("🤖 Bot online e monitorando solicitações.")
+print("Bot iniciado com sucesso.")
