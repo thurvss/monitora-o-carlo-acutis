@@ -1,2 +1,2 @@
 # monitora-o-carlo-acutis
-Feito com AI
+Feito com AI (ChatGPT)
