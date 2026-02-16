@@ -1,6 +1,7 @@
 import requests
 import time
 from datetime import datetime
+from zoneinfo import ZoneInfo
 import threading
 
 URL = "https://anjodajuventude.com.br/"
@@ -85,7 +86,7 @@ def check_site():
             page = response.text.lower()
 
             current_status = "FECHADO" if PHRASE_BLOCKED in page else "ABERTO"
-            now = datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+            now = datetime.now(ZoneInfo("America/Manaus")).strftime("%d/%m/%Y %H:%M:%S")
 
             if last_status is None:
                 last_status = current_status
@@ -134,3 +135,4 @@ threading.Thread(target=bot_listener).start()
 
 send_telegram("🤖 Bot online e monitorando solicitações.")
 print("Bot iniciado com sucesso.")
+
