@@ -6,7 +6,9 @@ import threading
 
 URL = "https://anjodajuventude.com.br/"
 BOT_TOKEN = "8305296309:AAEtnnYV9HIe6hv-KO8I_nNCz-l1Pm1lAS8"
-CHAT_ID = int("7100064741")
+AUTHORIZED_USERS = [
+    7100064741
+]
 
 CHECK_INTERVAL = 30
 PHRASE_BLOCKED = "envio de novos pedidos está suspenso"
@@ -20,13 +22,13 @@ last_error = None
 
 
 def send_telegram(message):
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    data = {
-        "chat_id": CHAT_ID,
-        "text": message
-    }
-    requests.post(url, data=data)
-
+    for user_id in AUTHORIZED_USERS:
+        url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
+        data = {
+            "chat_id": user_id,
+            "text": message
+        }
+        requests.post(url, data=data)
 
 def get_updates():
     global last_update_id
@@ -45,9 +47,8 @@ def get_updates():
         text = message.get("text", "")
         chat_id = message.get("chat", {}).get("id")
 
-        if chat_id == CHAT_ID:
+        if chat_id in AUTHORIZED_USERS:
             handle_command(text)
-
 
 def handle_command(text):
     global last_status, last_open_time, last_close_time
@@ -71,7 +72,6 @@ def handle_command(text):
             f"📌 STATUS DAS SOLICITAÇÕES\n"
             f"{info}"
         )
-
 
 def check_site():
     global last_status, last_open_time, last_close_time, bot_online, last_error
@@ -120,7 +120,6 @@ def check_site():
 
         time.sleep(CHECK_INTERVAL)
 
-
 def bot_listener():
     while True:
         try:
@@ -135,4 +134,5 @@ threading.Thread(target=bot_listener).start()
 
 send_telegram("🤖 Bot online e monitorando solicitações.")
 print("Bot iniciado com sucesso.")
+
 
