@@ -7,7 +7,8 @@ import threading
 URL = "https://anjodajuventude.com.br/"
 BOT_TOKEN = "8305296309:AAEtnnYV9HIe6hv-KO8I_nNCz-l1Pm1lAS8"
 AUTHORIZED_USERS = [
-    7100064741
+    7100064741, # Arthur
+    6866743029 # Jonnybel
 ]
 
 CHECK_INTERVAL = 30
@@ -134,5 +135,6 @@ threading.Thread(target=bot_listener).start()
 
 send_telegram("🤖 Bot online e monitorando solicitações.")
 print("Bot iniciado com sucesso.")
+
 
 
